@@ -1,0 +1,10 @@
+{
+    "name": "descope-scripts",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@descope/node-sdk": "^1.6.8",
+        "fs": "^0.0.1-security"
+    }
+}

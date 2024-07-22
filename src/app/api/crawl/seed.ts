@@ -5,6 +5,8 @@ import { chunkedUpsert } from '../../utils/chunkedUpsert'
 import md5 from "md5";
 import { Crawler, Page } from "./crawler";
 import { truncateStringByBytes } from "@/utils/truncateString"
+import DescopeClient from '@descope/node-sdk';
+import fs from 'fs';
 
 interface SeedOptions {
   splittingMethod: string
@@ -14,7 +16,13 @@ interface SeedOptions {
 
 type DocumentSplitter = RecursiveCharacterTextSplitter | MarkdownTextSplitter
 
-async function seed(url: string, limit: number, indexName: string, cloudName: ServerlessSpecCloudEnum, regionName: string, options: SeedOptions) {
+async function seed(url: string,
+  userId: string,
+  limit: number,
+  indexName: string,
+  cloudName: ServerlessSpecCloudEnum,
+  regionName: string,
+  options: SeedOptions) {
   try {
     // Initialize the Pinecone client
     const pinecone = new Pinecone();
@@ -27,6 +35,8 @@ async function seed(url: string, limit: number, indexName: string, cloudName: Se
 
     // Crawl the given URL and get the pages
     const pages = await crawler.crawl(url) as Page[];
+
+    await createRelation(userId, url);
 
     // Choose the appropriate document splitter based on the splitting method
     const splitter: DocumentSplitter = splittingMethod === 'recursive' ?
@@ -43,19 +53,20 @@ async function seed(url: string, limit: number, indexName: string, cloudName: Se
         name: indexName,
         dimension: 1536,
         waitUntilReady: true,
-        spec: { 
-          serverless: { 
-              cloud: cloudName, 
-              region: regionName
+        spec: {
+          serverless: {
+            cloud: cloudName,
+            region: regionName
           }
-        } 
+        }
       });
     }
 
     const index = pinecone.Index(indexName)
 
     // Get the vector embeddings for the documents
-    const vectors = await Promise.all(documents.flat().map(embedDocument));
+    const vectors = await Promise.all(documents.flat()
+      .map((doc: Document) => embedDocument(doc as Document, userId)));
 
     // Upsert vectors into the Pinecone index
     await chunkedUpsert(index!, vectors, '', 10);
@@ -68,7 +79,7 @@ async function seed(url: string, limit: number, indexName: string, cloudName: Se
   }
 }
 
-async function embedDocument(doc: Document): Promise<PineconeRecord> {
+async function embedDocument(doc: Document, userId: string): Promise<PineconeRecord> {
   try {
     // Generate OpenAI embeddings for the document content
     const embedding = await getEmbeddings(doc.pageContent);
@@ -84,7 +95,8 @@ async function embedDocument(doc: Document): Promise<PineconeRecord> {
         chunk: doc.pageContent, // The chunk of text that the vector represents
         text: doc.metadata.text as string, // The text of the document
         url: doc.metadata.url as string, // The URL where the document was found
-        hash: doc.metadata.hash as string // The hash of the document content
+        hash: doc.metadata.hash as string, // The hash of the document content
+        userId: userId // The user ID of the user who seeded the document
       }
     } as PineconeRecord;
   } catch (error) {
@@ -122,7 +134,32 @@ async function prepareDocument(page: Page, splitter: DocumentSplitter): Promise<
   });
 }
 
+async function createRelation(userId: string, docUrl: string) {
+  const managementKey = "K2jXxMeRCvn5JYah0ToyyS5eJPLCYcz0pkUfUWt9NfgTWv6EJHLtUtY3vDI22woGalxkcTL"
 
+  try {
+    //  baseUrl="<URL>" // When initializing the Descope clientyou can also configure the baseUrl ex: https://auth.company.com  - this is useful when you utilize CNAME within your Descope project.
+    const descopeClient = DescopeClient({
+      projectId: 'P2jWckKUbwgC4qyurDSiKZwGa7Cq',
+      managementKey: managementKey
+    });
+
+    const relations = [{
+      resource: docUrl,
+      relationDefinition: 'owner',
+      namespace: 'document',
+      target: userId,
+    }];
+
+    const resp = await descopeClient.management.authz.createRelations(relations);
+
+    console.log("relation created: " + JSON.stringify(resp));
+  } catch (error) {
+    // handle the error
+    console.log("failed to initialize: " + error)
+  }
+
+}
 
 
 export default seed;
