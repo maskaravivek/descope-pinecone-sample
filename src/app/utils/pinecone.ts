@@ -42,7 +42,7 @@ const getMatchesFromEmbeddings = async (userId: string, embeddings: number[], to
 
     let matches = queryResult.matches || []
     matches = matches.filter(m => m.metadata && m.metadata.userId === userId)
-    
+
     return matches
   } catch (e) {
     // Log the error and throw it

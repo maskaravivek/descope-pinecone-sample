@@ -13,8 +13,17 @@ import { useSession, useUser } from '@descope/nextjs-sdk/client';
 const Page: React.FC = () => {
   const [gotMessages, setGotMessages] = useState(false);
   const [context, setContext] = useState<string[] | null>(null);
-  
+
+  // useUser retrieves the logged in user information
+  const { user, isUserLoading } = useUser();
+  // useDescope retrieves Descope SDK for further operations related to authentication
+  // such as logout
+
   const { messages, input, handleInputChange, handleSubmit } = useChat({
+    sendExtraMessageFields: true,
+    body: {
+      userId: user?.userId,
+    },
     onFinish: async () => {
       setGotMessages(true);
     },
@@ -29,10 +38,6 @@ const Page: React.FC = () => {
     setGotMessages(false);
   };
 
-  // useUser retrieves the logged in user information
-  const { user, isUserLoading } = useUser();
-  // useDescope retrieves Descope SDK for further operations related to authentication
-  // such as logout
 
   useEffect(() => {
     const getContext = async () => {
@@ -54,7 +59,7 @@ const Page: React.FC = () => {
   }, [user, messages, gotMessages]);
 
   const { isAuthenticated, isSessionLoading } = useSession();
-  
+
   if (isSessionLoading || isUserLoading) {
     return <p>Loading...</p>;
   }
