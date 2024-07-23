@@ -1,5 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { urls } from "./urls";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import UrlButton from "./UrlButton";
 import { Card, ICard } from "./Card";
 import { clearIndex, crawlDocument, getRelations } from "./utils";

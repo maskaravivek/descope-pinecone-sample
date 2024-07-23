@@ -24,14 +24,4 @@ async function createSchema() {
     }
 }
 
-async function checkRelationsForUser(userId) {
-    try {
-        const relations = await descopeClient.management.authz.targetsRelations([userId]);
-        console.log("Relations for user: " + JSON.stringify(relations));
-    }
-    catch (error) {
-        console.log("failed to get relations: " + error)
-    }
-}
-
-await checkRelationsForUser("U2jXDRKI4ALDyPsNYts8HKTl2QeM")
+await createSchema()

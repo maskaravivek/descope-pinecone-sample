@@ -2,15 +2,13 @@
 
 "use client";
 
-import React, { useEffect, useRef, useState, FormEvent, useCallback } from "react";
+import React, { useEffect, useRef, useState, FormEvent } from "react";
 import { Context } from "@/components/Context";
 import Header from "@/components/Header";
 import Chat from "@/components/Chat";
 import { useChat } from "ai/react";
-import InstructionModal from "./components/InstructionModal";
-import { AiFillGithub, AiOutlineInfoCircle } from "react-icons/ai";
 import { Descope } from '@descope/nextjs-sdk';
-import { useDescope, useSession, useUser } from '@descope/nextjs-sdk/client';
+import { useSession, useUser } from '@descope/nextjs-sdk/client';
 
 const Page: React.FC = () => {
   const [gotMessages, setGotMessages] = useState(false);
@@ -31,12 +29,18 @@ const Page: React.FC = () => {
     setGotMessages(false);
   };
 
+  // useUser retrieves the logged in user information
+  const { user, isUserLoading } = useUser();
+  // useDescope retrieves Descope SDK for further operations related to authentication
+  // such as logout
+
   useEffect(() => {
     const getContext = async () => {
       const response = await fetch("/api/context", {
         method: "POST",
         body: JSON.stringify({
           messages,
+          userId: user.userId,
         }),
       });
       const { context } = await response.json();
@@ -47,15 +51,10 @@ const Page: React.FC = () => {
     }
 
     prevMessagesLengthRef.current = messages.length;
-  }, [messages, gotMessages]);
+  }, [user, messages, gotMessages]);
 
-  const { isAuthenticated, isSessionLoading, sessionToken } = useSession();
-  // useUser retrieves the logged in user information
-  const { user, isUserLoading } = useUser();
-  // useDescope retrieves Descope SDK for further operations related to authentication
-  // such as logout
-  const sdk = useDescope();
-
+  const { isAuthenticated, isSessionLoading } = useSession();
+  
   if (isSessionLoading || isUserLoading) {
     return <p>Loading...</p>;
   }
@@ -64,10 +63,9 @@ const Page: React.FC = () => {
     return (
       <Descope
         flowId="sign-up-or-in"
-        onSuccess={(e) => console.log('Logged in!')}
-        onError={(e) => console.log('Could not logged in!')}
+        onSuccess={() => console.log('Logged in!')}
+        onError={() => console.log('Could not logged in!')}
         redirectAfterSuccess="/"
-      // redirectAfterError="/error-page"
       />
     );
   }

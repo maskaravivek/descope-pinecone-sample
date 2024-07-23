@@ -138,7 +138,6 @@ async function createRelation(userId: string, docUrl: string) {
   const managementKey = "K2jXxMeRCvn5JYah0ToyyS5eJPLCYcz0pkUfUWt9NfgTWv6EJHLtUtY3vDI22woGalxkcTL"
 
   try {
-    //  baseUrl="<URL>" // When initializing the Descope clientyou can also configure the baseUrl ex: https://auth.company.com  - this is useful when you utilize CNAME within your Descope project.
     const descopeClient = DescopeClient({
       projectId: 'P2jWckKUbwgC4qyurDSiKZwGa7Cq',
       managementKey: managementKey
@@ -151,14 +150,10 @@ async function createRelation(userId: string, docUrl: string) {
       target: userId,
     }];
 
-    const resp = await descopeClient.management.authz.createRelations(relations);
-
-    console.log("relation created: " + JSON.stringify(resp));
+    await descopeClient.management.authz.createRelations(relations);
   } catch (error) {
-    // handle the error
     console.log("failed to initialize: " + error)
   }
-
 }
 
 

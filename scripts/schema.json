@@ -10,11 +10,6 @@
             "description": "The owner of the document"
           },
           {
-            "name": "editor",
-            "type": "string",
-            "description": "Users who can edit the document"
-          },
-          {
             "name": "viewer",
             "type": "string",
             "description": "Users who can view the document"
