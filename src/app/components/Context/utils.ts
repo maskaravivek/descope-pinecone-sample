@@ -3,6 +3,7 @@ import { ICard } from "./Card";
 
 export async function crawlDocument(
   url: string,
+  userId: string,
   setEntries: React.Dispatch<React.SetStateAction<IUrlEntry[]>>,
   setCards: React.Dispatch<React.SetStateAction<ICard[]>>,
   splittingMethod: string,
@@ -14,11 +15,15 @@ export async function crawlDocument(
       seed.url === url ? { ...seed, loading: true } : seed
     )
   );
+
+  console.log("Crawling document", url);
+
   const response = await fetch("/api/crawl", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       url,
+      userId,
       options: {
         splittingMethod,
         chunkSize,
@@ -57,4 +62,16 @@ export async function clearIndex(
     );
     setCards([]);
   }
+}
+
+export async function getRelations(userId: string) {
+  const response = await fetch("/api/docs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  });
+
+  const { relations } = await response.json();
+
+  return relations;
 }

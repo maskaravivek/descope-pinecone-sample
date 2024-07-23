@@ -6,10 +6,11 @@ export const runtime = 'edge'
 
 export async function POST(req: Request) {
 
-  const { url, options } = await req.json()
+  const { url, userId, options } = await req.json()
   try {
     const documents = await seed(
       url,
+      userId,
       1,
       process.env.PINECONE_INDEX!,
       process.env.PINECONE_CLOUD as ServerlessSpecCloudEnum || 'aws',
