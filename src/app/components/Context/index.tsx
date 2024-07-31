@@ -1,18 +1,21 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { urls } from "./urls";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import UrlButton from "./UrlButton";
 import { Card, ICard } from "./Card";
-import { clearIndex, crawlDocument } from "./utils";
+import { clearIndex, crawlDocument, getRelations } from "./utils";
 
 import { Button } from "./Button";
+import { useUser } from "@descope/nextjs-sdk/client";
 interface ContextProps {
   className: string;
   selected: string[] | null;
 }
 
 export const Context: React.FC<ContextProps> = ({ className, selected }) => {
-  const [entries, setEntries] = useState(urls);
+  const [entries, setEntries] = useState([]);
   const [cards, setCards] = useState<ICard[]>([]);
+
+  const { user, isUserLoading } = useUser();
+  const [documentUrl, setDocumentUrl] = useState("");
 
   const [splittingMethod, setSplittingMethod] = useState("markdown");
   const [chunkSize, setChunkSize] = useState(256);
@@ -23,6 +26,28 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
     const element = selected && document.getElementById(selected[0]);
     element?.scrollIntoView({ behavior: "smooth" });
   }, [selected]);
+
+  useEffect(() => {
+    fetchRelations();
+  }, [user, isUserLoading]);
+
+  const fetchRelations = async () => {
+    if (user && !isUserLoading) {
+      const relations = await getRelations(user.userId);
+
+      if (relations) {
+        const urls = relations.data.filter((relation: any) => relation.resource && relation.resource.startsWith("http"))
+          .map((relation: any) => ({
+            url: relation.resource,
+            title: relation.resource,
+            seeded: false,
+            loading: false,
+          }));
+
+        setEntries(urls);
+      }
+    }
+  }
 
   const DropdownLabel: React.FC<
     React.PropsWithChildren<{ htmlFor: string }>
@@ -39,6 +64,7 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
         onClick={() =>
           crawlDocument(
             entry.url,
+            user?.userId || "",
             setEntries,
             setCards,
             splittingMethod,
@@ -54,23 +80,9 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
     <div
       className={`flex flex-col border-2 overflow-y-auto rounded-lg border-gray-500 w-full ${className}`}
     >
+      <div className="flex flex-wrap w-full">{buttons}</div>
+
       <div className="flex flex-col items-start sticky top-0 w-full">
-        <div className="flex flex-col items-start lg:flex-row w-full lg:flex-wrap p-2">
-          {buttons}
-        </div>
-        <div className="flex-grow w-full px-4">
-          <Button
-            className="w-full my-2 uppercase active:scale-[98%] transition-transform duration-100"
-            style={{
-              backgroundColor: "#4f6574",
-              color: "white",
-            }}
-            onClick={() => clearIndex(setEntries, setCards)}
-          >
-            Clear Index
-          </Button>
-        </div>
-        <div className="flex p-2"></div>
         <div className="text-left w-full flex flex-col rounded-b-lg bg-gray-600 p-3 subpixel-antialiased">
           <DropdownLabel htmlFor="splittingMethod">
             Splitting Method:
@@ -116,6 +128,48 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
               </div>
             </div>
           )}
+
+          <DropdownLabel htmlFor="documentUrl">Document URL:</DropdownLabel>
+
+          <input
+            className="p-2 bg-gray-700 w-full"
+            type="text"
+            placeholder="https://example.com"
+            value={documentUrl}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setDocumentUrl(e.target.value)
+            }
+          />
+          <Button
+            className="w-full my-2 uppercase active:scale-[98%] transition-transform duration-100"
+            style={{
+              backgroundColor: "#4f6574",
+              color: "white",
+            }}
+            onClick={() =>
+              crawlDocument(
+                documentUrl,
+                user?.userId || "",
+                setEntries,
+                setCards,
+                splittingMethod,
+                chunkSize,
+                overlap
+              )
+            }
+          >
+            Index Document
+          </Button>
+          <Button
+            className="w-full my-2 uppercase active:scale-[98%] transition-transform duration-100"
+            style={{
+              backgroundColor: "#4f6574",
+              color: "white",
+            }}
+            onClick={() => clearIndex(setEntries, setCards)}
+          >
+            Clear Index
+          </Button>
         </div>
       </div>
       <div className="flex flex-wrap w-full">

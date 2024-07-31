@@ -4,6 +4,7 @@ export const metadata = {
 };
 
 import "../global.css";
+import { AuthProvider } from '@descope/nextjs-sdk';
 
 export default function RootLayout({
   children,
@@ -11,8 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <AuthProvider projectId="P2jWckKUbwgC4qyurDSiKZwGa7Cq">
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </AuthProvider>
   );
 }
