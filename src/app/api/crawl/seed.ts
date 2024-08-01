@@ -6,7 +6,6 @@ import md5 from "md5";
 import { Crawler, Page } from "./crawler";
 import { truncateStringByBytes } from "@/utils/truncateString"
 import DescopeClient from '@descope/node-sdk';
-import fs from 'fs';
 
 interface SeedOptions {
   splittingMethod: string
@@ -36,6 +35,7 @@ async function seed(url: string,
     // Crawl the given URL and get the pages
     const pages = await crawler.crawl(url) as Page[];
 
+    //create a relation between the user and the document
     await createRelation(userId, url);
 
     // Choose the appropriate document splitter based on the splitting method
@@ -135,12 +135,10 @@ async function prepareDocument(page: Page, splitter: DocumentSplitter): Promise<
 }
 
 async function createRelation(userId: string, docUrl: string) {
-  const managementKey = "K2jXxMeRCvn5JYah0ToyyS5eJPLCYcz0pkUfUWt9NfgTWv6EJHLtUtY3vDI22woGalxkcTL"
-
   try {
     const descopeClient = DescopeClient({
-      projectId: 'P2jWckKUbwgC4qyurDSiKZwGa7Cq',
-      managementKey: managementKey
+      projectId: process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID as string,
+      managementKey: process.env.DESCOPE_MANAGEMENT_KEY as string
     });
 
     const relations = [{

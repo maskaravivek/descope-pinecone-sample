@@ -1,9 +1,9 @@
 import DescopeClient from '@descope/node-sdk';
 import fs from 'fs';
 
-const managementKey = "K2jXxMeRCvn5JYah0ToyyS5eJPLCYcz0pkUfUWt9NfgTWv6EJHLtUtY3vDI22woGalxkcTL"
+const managementKey = process.env.DESCOPE_MANAGEMENT_KEY;
 const descopeClient = DescopeClient({
-    projectId: 'P2jWckKUbwgC4qyurDSiKZwGa7Cq',
+    projectId: process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID,
     managementKey: managementKey
 });
 

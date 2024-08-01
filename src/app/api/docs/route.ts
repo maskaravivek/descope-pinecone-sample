@@ -15,12 +15,10 @@ export async function POST(req: Request) {
 }
 
 async function getRelations(userId: string) {
-  const managementKey = "K2jXxMeRCvn5JYah0ToyyS5eJPLCYcz0pkUfUWt9NfgTWv6EJHLtUtY3vDI22woGalxkcTL"
-
   try {
     const descopeClient = DescopeClient({
-      projectId: 'P2jWckKUbwgC4qyurDSiKZwGa7Cq',
-      managementKey: managementKey
+      projectId: process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID as string,
+      managementKey: process.env.DESCOPE_MANAGEMENT_KEY as string
     });
 
     const relations = await descopeClient.management.authz.targetsRelations([userId]);
