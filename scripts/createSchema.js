@@ -1,10 +1,15 @@
 import DescopeClient from '@descope/node-sdk';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
-const managementKey = process.env.DESCOPE_MANAGEMENT_KEY;
+// Load environment variables from .env file
+dotenv.config({
+    path: "../.env"
+});
+
 const descopeClient = DescopeClient({
     projectId: process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID,
-    managementKey: managementKey
+    managementKey: process.env.DESCOPE_MANAGEMENT_KEY
 });
 
 async function createSchema() {
