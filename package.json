@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test:e2e": "playwright test",
-    "test:show": "playwright show-report"
+    "lint": "next lint"
   },
   "dependencies": {
     "@descope/nextjs-sdk": "^0.0.16",
@@ -38,7 +36,6 @@
     "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@playwright/test": "^1.38.0",
     "@types/md5": "^2.3.2"
   }
 }
