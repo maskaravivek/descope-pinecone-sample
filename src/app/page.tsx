@@ -66,12 +66,17 @@ const Page: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <Descope
-        flowId="sign-up-or-in"
-        onSuccess={() => console.log('Logged in!')}
-        onError={() => console.log('Could not logged in!')}
-        redirectAfterSuccess="/"
-      />
+      <div className="max-w-xl mx-auto">
+        <Descope
+          debug={false}
+          flowId="sign-up-or-in"
+          onSuccess={() => console.log('Logged in!')}
+          onError={(error) =>
+            console.log('Could not logged in!', error)
+          }
+          redirectAfterSuccess="/"
+        />
+      </div>
     );
   }
 

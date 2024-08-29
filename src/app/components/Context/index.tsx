@@ -105,7 +105,7 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
                   Chunk Size: {chunkSize}
                 </DropdownLabel>
                 <input
-                  className="p-2 bg-gray-700"
+                  className="p-2 bg-gray-700 text-white"
                   type="range"
                   id="chunkSize"
                   min={1}
@@ -118,7 +118,7 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
                   Overlap: {overlap}
                 </DropdownLabel>
                 <input
-                  className="p-2 bg-gray-700"
+                  className="p-2 bg-gray-700 text-white"
                   type="range"
                   id="overlap"
                   min={1}
@@ -132,7 +132,7 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
           <DropdownLabel htmlFor="documentUrl">Document URL:</DropdownLabel>
 
           <input
-            className="p-2 bg-gray-700 w-full"
+            className="p-2 bg-gray-700 w-full text-white"
             type="text"
             placeholder="https://example.com"
             value={documentUrl}
@@ -146,7 +146,7 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
               backgroundColor: "#4f6574",
               color: "white",
             }}
-            onClick={() =>
+            onClick={async () => {
               crawlDocument(
                 documentUrl,
                 user?.userId || "",
@@ -156,6 +156,10 @@ export const Context: React.FC<ContextProps> = ({ className, selected }) => {
                 chunkSize,
                 overlap
               )
+
+              // Fetch relations again. We will define this function later in the tutorial.
+              await fetchRelations();
+            }
             }
           >
             Index Document
